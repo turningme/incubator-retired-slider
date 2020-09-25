@@ -14,6 +14,7 @@ public class ExtConstants {
     public static final String ACTION_START = "start";
     public static final String ACTION_BUILD = "build";
     public static final String ACTION_STOP = "stop";
+    public static final String ACTION_META_CONVERT = "metaconvert";
 
     /**
      * Arguments keys
@@ -24,6 +25,12 @@ public class ExtConstants {
     public static final String ARG_TEMPLATE_PARTITION_NAME = "--template.partition";
     public static final String ARG_TEMPLATE_MEMORY_NAME = "--template.mem";
     public static final String ARG_TEMPLATE_INSTANCE_MEMORY_NAME = "--template.instance.mem";
+
+    /**
+     * meta convert
+     */
+    public static final String ARG_META_CONVERT_SRC = "--source";
+    public static final String ARG_META_CONVERT_DEST = "--dest";
 
 
     /**

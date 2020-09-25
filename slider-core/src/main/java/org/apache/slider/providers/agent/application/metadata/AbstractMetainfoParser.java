@@ -40,7 +40,7 @@ public abstract class AbstractMetainfoParser {
       .getLogger(AbstractMetainfoParser.class);
 
   public AbstractMetainfoParser() {
-    gson = gsonBuilder.create();
+    gson = gsonBuilder.setPrettyPrinting().create();
   }
 
   /**

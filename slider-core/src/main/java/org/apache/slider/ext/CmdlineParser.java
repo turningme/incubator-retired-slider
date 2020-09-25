@@ -13,10 +13,12 @@ import org.apache.slider.core.exceptions.BadCommandArgumentsException;
 import org.apache.slider.core.exceptions.ErrorStrings;
 import org.apache.slider.core.exceptions.SliderException;
 import org.apache.slider.ext.args.ActionBuildArgs;
+import org.apache.slider.ext.args.ActionMetaConvertArgs;
 import org.apache.slider.ext.args.ActionStartArgs;
 
 import static org.apache.slider.common.params.SliderActions.ACTION_HELP;
 import static org.apache.slider.ext.ExtConstants.ACTION_BUILD;
+import static org.apache.slider.ext.ExtConstants.ACTION_META_CONVERT;
 import static org.apache.slider.ext.ExtConstants.ACTION_START;
 
 /**
@@ -39,6 +41,7 @@ public class CmdlineParser extends AbstractArgsDelegate {
 
     private final ActionStartArgs actionStart = new ActionStartArgs();
     private final ActionBuildArgs actionBuild = new ActionBuildArgs();
+    private final ActionMetaConvertArgs actionMetaConvert = new ActionMetaConvertArgs();
 
     /**
      *
@@ -53,8 +56,9 @@ public class CmdlineParser extends AbstractArgsDelegate {
      * Override point to add a set of actions
      */
     protected void addActionArguments() {
-       commander.addCommand(actionStart);
-       commander.addCommand(actionBuild);
+        commander.addCommand(actionStart);
+        commander.addCommand(actionBuild);
+        commander.addCommand(actionMetaConvert);
     }
 
     /**
@@ -119,6 +123,9 @@ public class CmdlineParser extends AbstractArgsDelegate {
             case ACTION_START:
                 bindCoreAction(actionStart);
                 break;
+            case ACTION_META_CONVERT:
+                bindCoreAction(actionMetaConvert);
+                break;
             default:
                 throw new BadCommandArgumentsException(ErrorStrings.ERROR_UNKNOWN_ACTION
                                                                + " " + action);
@@ -145,6 +152,10 @@ public class CmdlineParser extends AbstractArgsDelegate {
 
     public ActionStartArgs getActionStart() {
         return actionStart;
+    }
+
+    public ActionMetaConvertArgs getActionMetaConvert() {
+        return actionMetaConvert;
     }
 
     public static void main(String[] args) throws SliderException {

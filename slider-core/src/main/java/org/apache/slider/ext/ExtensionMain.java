@@ -1,12 +1,19 @@
 package org.apache.slider.ext;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathNotFoundException;
 import org.apache.hadoop.registry.client.binding.RegistryUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
@@ -21,6 +28,7 @@ import org.apache.slider.core.main.RunService;
 import org.apache.slider.core.main.ServiceLauncher;
 import org.apache.slider.core.registry.YarnAppListClient;
 import org.apache.slider.ext.args.ActionBuildArgs;
+import org.apache.slider.ext.args.ActionMetaConvertArgs;
 import org.apache.slider.ext.persist.TemplateTopologySerDeser;
 import org.apache.slider.ext.utils.ConvertUtil;
 import org.apache.slider.server.services.utility.AbstractSliderLaunchedService;
@@ -38,6 +46,7 @@ import static org.apache.slider.core.main.LauncherExitCodes.EXIT_SUCCESS;
 import static org.apache.slider.core.main.LauncherExitCodes.EXIT_UNIMPLEMENTED;
 import static org.apache.slider.core.main.LauncherExitCodes.EXIT_USAGE;
 import static org.apache.slider.ext.ExtConstants.ACTION_BUILD;
+import static org.apache.slider.ext.ExtConstants.ACTION_META_CONVERT;
 import static org.apache.slider.ext.ExtConstants.ACTION_START;
 import static org.apache.slider.ext.ExtConstants.ACTION_STOP;
 
@@ -68,24 +77,6 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
     }
 
     /**
-     * Build extension resources . Look at example as follows :
-     * root@bjo-ssp-sfx02[DEV:]:/home/jpliu/slider/app-tomcat/exploded$ tree
-     * .
-     * |-- appConfig-default.json
-     * |-- LICENSE.txt
-     * |-- metainfo.xml
-     * |-- NOTICE.txt
-     * |-- package
-     * |   |-- files
-     * |   |   `-- tomcat-8.0.30.tar.gz
-     * |   |-- scripts
-     * |   |   |-- params.py
-     * |   |   `-- tomcat.py
-     * |   `-- templates
-     * |       |-- server.xml.j2
-     * |       `-- tomcat-users.xml.j2
-     * |-- README.md
-     * `-- resources-default.json
      *
      * @param args
      * @return
@@ -126,6 +117,31 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
         return EXIT_SUCCESS;
     }
 
+
+    /**
+     *
+     * @param args
+     * @return
+     * @throws BadCommandArgumentsException
+     * @throws IOException
+     */
+    private int actionMetaConvert(ActionMetaConvertArgs args) throws BadCommandArgumentsException, IOException{
+        String flag = args.getFlag();
+        System.out.println("flag = " + flag);
+
+        String sourcePath = args.getSourcePath();
+        String targetPath = args.getDestPath();
+
+        // determine if print the converted result to console
+        boolean consolePrint = StringUtils.isBlank(targetPath) ? true :false;
+
+        MetaInfoProcessor metaInfoProcessor = new MetaInfoProcessor();
+        File sourceFile = new File(sourcePath);
+        LocalFileSystem localFileSystem = FileSystem.getLocal(new Configuration());
+        OutputStream outputStream = consolePrint ? new PrintStream(System.out): localFileSystem.create(new Path(new File(targetPath).toURI()));
+        metaInfoProcessor.convertXml2JsonFile(localFileSystem.open(new Path(sourceFile.toURI())), outputStream);
+        return EXIT_SUCCESS;
+    }
 
     public void launch(String[] args) throws Throwable {
         parser = new CmdlineParser(args);
@@ -195,6 +211,10 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
                 break;
 
             case ACTION_STOP:
+                break;
+
+            case ACTION_META_CONVERT:
+                actionMetaConvert(parser.getActionMetaConvert());
                 break;
 
             default:
