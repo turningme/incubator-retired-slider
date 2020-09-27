@@ -1,8 +1,11 @@
 package org.apache.slider.ext.args;
 
+import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
 import static org.apache.slider.ext.ExtConstants.ACTION_BUILD;
+import static org.apache.slider.ext.ExtConstants.ARG_APPLICATION_NAME;
+import static org.apache.slider.ext.ExtConstants.ARG_APPLICATION_TARBALL_PATH;
 
 
 /**
@@ -11,8 +14,16 @@ import static org.apache.slider.ext.ExtConstants.ACTION_BUILD;
 
 @Parameters(commandNames = {ACTION_BUILD}, commandDescription = "build the overall templates topology ")
 public class ActionBuildArgs extends TemplateClusterBuildingActions{
+
+    @Parameter(names = {ARG_APPLICATION_TARBALL_PATH}, description = "Tallball path ", required = true)
+    String tarBallPath;
+
     @Override
     public String getActionName() {
         return ACTION_BUILD;
+    }
+
+    public String getTarBallPath() {
+        return tarBallPath;
     }
 }

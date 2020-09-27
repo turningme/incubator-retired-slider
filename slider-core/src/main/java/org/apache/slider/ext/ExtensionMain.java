@@ -93,7 +93,9 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
      */
     private int actionBuild(ActionBuildArgs args) throws BadCommandArgumentsException, IOException, ConfigurationException {
         String name = args.getApplicationName();
+
         TemplateTopology templateTopology = new TemplateTopology(name);
+        templateTopology.setTarballPath(args.getTarBallPath());
 
         templateTopology.addTemplate(args.getTemplateMap());
         templateTopology.addTemplateByParallelism(ConvertUtil.convert(args.getTemplatePrallelMap()));

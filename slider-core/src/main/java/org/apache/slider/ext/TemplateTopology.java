@@ -25,7 +25,7 @@ import static org.apache.slider.api.ResourceKeys.YARN_MEMORY;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class TemplateTopology {
-
+    public String tarballPath;
     public Map<String, Template> templateMap;
     public Map<String, TemplateInstance> templateInstanceMap;
 
@@ -41,6 +41,8 @@ public class TemplateTopology {
         templateMap = new HashMap<>();
         templateInstanceMap = new HashMap<>();
     }
+
+
 
 
     public void addTemplate(Map<String, String> templateKeyInfo) {
@@ -212,7 +214,13 @@ public class TemplateTopology {
         return templateMap;
     }
 
+    public String getTarballPath() {
+        return tarballPath;
+    }
 
+    public void setTarballPath(String tarballPath) {
+        this.tarballPath = tarballPath;
+    }
 
     public void updateTemplateConfigPath(String basePath){
         Iterator<Map.Entry<String,Template>> iter = templateMap.entrySet().iterator();

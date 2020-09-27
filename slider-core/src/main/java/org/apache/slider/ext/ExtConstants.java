@@ -27,6 +27,7 @@ public class ExtConstants {
     public static final String ARG_TEMPLATE_PARTITION_NAME = "--template.partition";
     public static final String ARG_TEMPLATE_MEMORY_NAME = "--template.mem";
     public static final String ARG_TEMPLATE_INSTANCE_MEMORY_NAME = "--template.instance.mem";
+    public static final String ARG_APPLICATION_TARBALL_PATH = "--tarball";
 
     /**
      * meta convert

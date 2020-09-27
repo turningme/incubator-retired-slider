@@ -2,8 +2,6 @@ package org.apache.slider.ext;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.hadoop.fs.LocalFileSystem;
@@ -32,6 +30,7 @@ public class AppDefinitionLayout {
     private AppConfBean appConfBean;
     private ResourceBean resourceBean;
     private LocalFileSystem localFileSystem;
+    private Path tarballPathLocal;
 
     public AppDefinitionLayout(LocalFileSystem localFileSystem) {
         this.localFileSystem = localFileSystem;
@@ -39,7 +38,7 @@ public class AppDefinitionLayout {
     }
 
     void init(){
-
+        // TODO: 2020/9/27
     }
 
     public void resolveFromTemplateTopology(TemplateTopology templateTopology){
@@ -60,7 +59,7 @@ public class AppDefinitionLayout {
         resourceGenHandler.handle(templateTopology);
         resourceBean = resourceGenHandler.getHandle();
 
-
+        tarballPathLocal = new Path(new File(templateTopology.getTarballPath()).toURI());
     }
 
 
@@ -91,6 +90,8 @@ public class AppDefinitionLayout {
 
         //persist appconf.json
         confTreeSerDeser.save(localFileSystem, appDefinitionPaths.appConfPath,appConfBean.getConfTree() , true);
+
+        localFileSystem.copyFromLocalFile(false,true,tarballPathLocal,appDefinitionPaths.tarballPath);
     }
 
 
