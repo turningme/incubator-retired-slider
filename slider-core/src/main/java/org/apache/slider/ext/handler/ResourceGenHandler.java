@@ -1,10 +1,13 @@
 package org.apache.slider.ext.handler;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.slider.ext.TemplateInstance;
 import org.apache.slider.ext.TemplateTopology;
 import org.apache.slider.ext.handler.bean.ResourceBean;
 
 import static org.apache.slider.api.ResourceKeys.COMPONENT_INSTANCES;
+import static org.apache.slider.api.ResourceKeys.COMPONENT_PRIORITY;
 import static org.apache.slider.api.ResourceKeys.DEF_YARN_MEMORY;
 import static org.apache.slider.api.ResourceKeys.YARN_CORES;
 import static org.apache.slider.api.ResourceKeys.YARN_MEMORY;
@@ -15,6 +18,7 @@ import static org.apache.slider.ext.ExtConstants.COMPONENT_SLIDER_DEFAULT;
  */
 public class ResourceGenHandler implements Handler<ResourceBean>, TemplateTopology.InstanceVisitor {
     ResourceBean resourceBean;
+    static AtomicInteger priorityHacked = new AtomicInteger(201);
 
     public ResourceGenHandler() {
     }
@@ -44,5 +48,6 @@ public class ResourceGenHandler implements Handler<ResourceBean>, TemplateTopolo
         resourceBean.addComponents(componentName, YARN_MEMORY, String.valueOf(templateInstance.getMemXmx()));
         resourceBean.addComponents(componentName, YARN_CORES, String.valueOf(1));
         resourceBean.addComponents(componentName, COMPONENT_INSTANCES, String.valueOf(1));
+        resourceBean.addComponents(componentName,COMPONENT_PRIORITY, String.valueOf(priorityHacked.addAndGet(2)));
     }
 }
