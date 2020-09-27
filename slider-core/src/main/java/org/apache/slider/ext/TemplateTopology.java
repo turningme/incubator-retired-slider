@@ -1,13 +1,22 @@
 package org.apache.slider.ext;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.slider.ext.utils.ConvertUtil;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+import static org.apache.slider.api.ResourceKeys.COMPONENT_INSTANCES;
+import static org.apache.slider.api.ResourceKeys.YARN_CORES;
+import static org.apache.slider.api.ResourceKeys.YARN_MEMORY;
+
 /**
  * Created by jpliu on 2020/9/23.
  * The representation for all the templates and its instances .
@@ -20,10 +29,11 @@ public class TemplateTopology {
     public Map<String, Template> templateMap;
     public Map<String, TemplateInstance> templateInstanceMap;
 
+    static final String PREFIX = "template-";
     private String name;
 
     public TemplateTopology(String appName) {
-        name = "tpl-topo-" + appName;
+        name = PREFIX + appName;
         init();
     }
 
@@ -155,7 +165,79 @@ public class TemplateTopology {
     }
 
 
+    /**
+     * validate all the fields ,  throw exception if any field wrong .
+     * make sure all the memory fields not negative .
+     * make sure config paths exist .
+     * make sure the correctness of template job  parallelism and partitions .
+     *
+     */
+    public void validateComplete(){
+
+    }
+
+
+    /**
+     * complete all the phases and make this available
+     */
+    public void complete(){
+        validateComplete();
+    }
+
+
+
     public String getName() {
         return name;
+    }
+
+
+    public void traversal(InstanceVisitor visitor){
+        Iterator<Map.Entry<String,Template>> iter = templateMap.entrySet().iterator();
+        while (iter.hasNext()){
+            Map.Entry<String,Template> en = iter.next();
+            Template template = en.getValue();
+            Iterator<TemplateInstance> instanceIter = template.getTemplateInstanceList().iterator();
+            while(instanceIter.hasNext()) {
+                TemplateInstance templateInstance = instanceIter.next();
+                visitor.visit(templateInstance);
+            }
+        }
+    }
+
+    public Map<String, TemplateInstance> getTemplateInstanceMap() {
+        return templateInstanceMap;
+    }
+
+    public Map<String, Template> getTemplateMap() {
+        return templateMap;
+    }
+
+
+
+    public void updateTemplateConfigPath(String basePath){
+        Iterator<Map.Entry<String,Template>> iter = templateMap.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry<String, Template> en = iter.next();
+            Template template = en.getValue();
+            String tplName = template.getName();
+
+            Iterator<TemplateInstance> iterInner = template.getTemplateInstanceList().iterator();
+            while (iterInner.hasNext()){
+                TemplateInstance templateInstance = iterInner.next();
+                //like xx/yy-number
+                String shortName = tplName +"/" + tplName + "-"+templateInstance.getSeq() + ".conf";
+
+                templateInstance.setPath(String.format("%s/%s", basePath , shortName));
+            }
+        }
+
+    }
+
+
+    /**
+     * The Visitor pattern
+     */
+    public interface InstanceVisitor{
+        void visit(TemplateInstance templateInstance);
     }
 }

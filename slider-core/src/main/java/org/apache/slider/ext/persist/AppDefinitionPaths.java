@@ -2,6 +2,10 @@ package org.apache.slider.ext.persist;
 
 import org.apache.hadoop.fs.Path;
 
+import static org.apache.slider.ext.ExtConstants.TEMPLATE_CLUSTER_LAYOUT_APPCONF;
+import static org.apache.slider.ext.ExtConstants.TEMPLATE_CLUSTER_LAYOUT_METAINFO;
+import static org.apache.slider.ext.ExtConstants.TEMPLATE_CLUSTER_LAYOUT_RESOURCE;
+
 /**
  * Created by jpliu on 2020/9/23.
  * Build extension resources . Look at example as follows :
@@ -40,14 +44,14 @@ public class AppDefinitionPaths {
 
     public AppDefinitionPaths(Path basePath) {
         this.basePath = basePath;
-        appConfPath = new Path(this.basePath, "appConfig-default.json");
-        resourcesPath = new Path(this.basePath, "resources-default.json");
-        metainfoPath = new Path(this.basePath, "metainfo.xml");
+        appConfPath = new Path(this.basePath, TEMPLATE_CLUSTER_LAYOUT_APPCONF);
+        resourcesPath = new Path(this.basePath, TEMPLATE_CLUSTER_LAYOUT_RESOURCE);
+        metainfoPath = new Path(this.basePath, TEMPLATE_CLUSTER_LAYOUT_METAINFO);
         packagePath = new Path(this.basePath, "package");
 
-        filesPath = new Path(this.packagePath,"filesPath");
-        scriptsPath= new Path(this.appConfPath,"scripts");
-        templatesPath= new Path(this.appConfPath,"templates");
+        filesPath = new Path(this.packagePath,"files");
+        scriptsPath= new Path(this.packagePath,"scripts");
+        templatesPath= new Path(this.packagePath,"templates");
 
         tarballPath = new Path(this.filesPath, "execute.tar.gz");
 

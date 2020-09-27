@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -66,6 +67,7 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
     private SliderYarnClientImpl yarnClient;
     private YarnAppListClient yarnAppListClient;
     protected SliderFileSystem sliderFileSystem;
+    protected LocalFileSystem localFileSystem ;
 
 
     public ExtensionMain() {
@@ -76,12 +78,20 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
         super(name);
     }
 
+
+    private synchronized LocalFileSystem getLocalFileSystem() throws IOException {
+        if (localFileSystem == null){
+            localFileSystem = FileSystem.getLocal(new Configuration());
+        }
+        return localFileSystem;
+    }
+
     /**
      *
      * @param args
      * @return
      */
-    private int actionBuild(ActionBuildArgs args) throws BadCommandArgumentsException, IOException {
+    private int actionBuild(ActionBuildArgs args) throws BadCommandArgumentsException, IOException, ConfigurationException {
         String name = args.getApplicationName();
         TemplateTopology templateTopology = new TemplateTopology(name);
 
@@ -94,22 +104,21 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
 
         templateTopology.addTemplateInstanceMemInfo(args.getTemplateInstanceMemMap());
 
+        //file directory structure planing
+        AppDefinitionLayout appDefinitionLayout = new AppDefinitionLayout(getLocalFileSystem());
+        //config update , path to the right hdfs paths
+        appDefinitionLayout.generateConfiguration(templateTopology,sliderFileSystem);
+
         //parse to json
         LOG.info(TemplateTopologySerDeser.toString(templateTopology));
         //persist it on hdfs
 
 
-        //generate metainfo
-
-        //genrate appconf
-
-        //generate resource
+        appDefinitionLayout.resolveFromTemplateTopology(templateTopology);
 
 
-        //file directory structure planing
-
-
-        //file generate and layout them
+        //materialize the app definition layout
+        appDefinitionLayout.materialize();
 
         //call build , and start from slider client
 

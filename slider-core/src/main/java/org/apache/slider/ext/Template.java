@@ -42,7 +42,7 @@ public class Template extends TemplateBase {
     public List<TemplateInstance> resolveInstances() {
         assert parallelism > 0 : "parallelism=" + parallelism +  " is not legal";
         assert partitionNum > 0;
-        assert partitionNum > parallelism;
+        assert partitionNum >= parallelism;
 
         PartitionAllocateMap partitionAllocateMap = new PartitionAllocateMap(partitionNum, parallelism);
         Iterator<Map.Entry<Integer, List<Integer>>> iter = partitionAllocateMap.allocate().entrySet().iterator();

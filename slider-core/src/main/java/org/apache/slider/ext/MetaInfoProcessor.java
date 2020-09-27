@@ -25,9 +25,12 @@ public class MetaInfoProcessor extends MetainfoParser{
 
     public void convertXml2JsonFile(InputStream inputStream , OutputStream outputStream) throws IOException {
         Metainfo metainfo = fromXmlStream(inputStream);
+        persistMetaInfo(metainfo, outputStream);
+    }
+
+
+    public void persistMetaInfo(Metainfo metainfo, OutputStream outputStream) throws IOException {
         String metainfoStr = toJsonString(metainfo);
-
-
         try {
             byte[] b = metainfoStr.getBytes(UTF_8);
             outputStream.write(b);
