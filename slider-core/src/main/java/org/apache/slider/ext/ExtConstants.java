@@ -50,6 +50,9 @@ public class ExtConstants {
     public static final String META_SCHEMA_VERSION_DEFAULT = "2.0";
     public static final String META_APP_COMMENT_DEFAULT = "Template Cluster";
     public static final String META_APP_VERSION_DEFAULT = "0.0.1";
+    public static final String META_APP_OS_PARAM_PY = "params.py";
+    public static final String META_APP_OS_BOOT_PY = "boot.py";
+    public static final String META_APP_TALLBALL_NAMW =  "execute.tar.gz";
 
 
     /**

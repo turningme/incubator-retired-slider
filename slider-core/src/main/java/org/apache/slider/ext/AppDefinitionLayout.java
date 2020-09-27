@@ -11,12 +11,17 @@ import org.apache.slider.core.exceptions.BadCommandArgumentsException;
 import org.apache.slider.core.persist.ConfTreeSerDeser;
 import org.apache.slider.ext.handler.AppConfGenHandler;
 import org.apache.slider.ext.handler.MetaInfoGenHandler;
+import org.apache.slider.ext.handler.PythonParamGenHandler;
+import org.apache.slider.ext.handler.PythonScriptGenHandler;
 import org.apache.slider.ext.handler.ResourceGenHandler;
 import org.apache.slider.ext.handler.bean.AppConfBean;
 import org.apache.slider.ext.handler.bean.MetaInfoBean;
+import org.apache.slider.ext.handler.bean.PythonParamBean;
+import org.apache.slider.ext.handler.bean.PythonScriptBean;
 import org.apache.slider.ext.handler.bean.ResourceBean;
 import org.apache.slider.ext.persist.AppDefinitionPaths;
 import org.apache.slider.ext.redstats.RedstatsConfigManager;
+import org.apache.slider.ext.utils.IOHelper;
 
 import static org.apache.slider.ext.ExtConstants.TEMPLATE_CLUSTER_LAYOUT_BASE_DIR;
 
@@ -31,6 +36,9 @@ public class AppDefinitionLayout {
     private ResourceBean resourceBean;
     private LocalFileSystem localFileSystem;
     private Path tarballPathLocal;
+
+    private PythonScriptBean pythonScriptBean;
+    private PythonParamBean pythonParamBean;
 
     public AppDefinitionLayout(LocalFileSystem localFileSystem) {
         this.localFileSystem = localFileSystem;
@@ -60,6 +68,15 @@ public class AppDefinitionLayout {
         resourceBean = resourceGenHandler.getHandle();
 
         tarballPathLocal = new Path(new File(templateTopology.getTarballPath()).toURI());
+
+        PythonScriptGenHandler pythonScriptHandler = new PythonScriptGenHandler();
+        pythonScriptHandler.handle(templateTopology);
+        pythonScriptBean = pythonScriptHandler.getHandle();
+
+
+        PythonParamGenHandler pythonParamGenHandler = new PythonParamGenHandler();
+        pythonParamGenHandler.handle(templateTopology);
+        pythonParamBean = pythonParamGenHandler.getHandle();
     }
 
 
@@ -90,6 +107,10 @@ public class AppDefinitionLayout {
 
         //persist appconf.json
         confTreeSerDeser.save(localFileSystem, appDefinitionPaths.appConfPath,appConfBean.getConfTree() , true);
+
+
+        IOHelper.writeString(pythonScriptBean.getContent(), localFileSystem.create(appDefinitionPaths.bootPyPath,true));
+        IOHelper.writeString(pythonParamBean.getContent(), localFileSystem.create(appDefinitionPaths.paramsPyPath,true));
 
         localFileSystem.copyFromLocalFile(false,true,tarballPathLocal,appDefinitionPaths.tarballPath);
     }

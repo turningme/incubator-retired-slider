@@ -5,6 +5,9 @@ import org.apache.slider.ext.TemplateTopology;
 import org.apache.slider.ext.handler.bean.MetaInfoBean;
 import org.apache.slider.providers.agent.application.metadata.AbstractComponent;
 
+import static org.apache.slider.ext.ExtConstants.META_APP_OS_BOOT_PY;
+import static org.apache.slider.ext.ExtConstants.META_APP_OS_PARAM_PY;
+import static org.apache.slider.ext.ExtConstants.META_APP_TALLBALL_NAMW;
 import static org.apache.slider.providers.agent.application.metadata.AbstractComponent.CATEGORY_SLAVE;
 
 /**
@@ -33,8 +36,8 @@ public class MetaInfoGenHandler implements Handler<MetaInfoBean> , TemplateTopol
     public void visit(TemplateInstance templateInstance) {
         String componentName = templateInstance.getName();
         metaInfoBean.addComponentAbstract(componentName, CATEGORY_SLAVE ,"");
-        metaInfoBean.addComponentScript(componentName, "scripts/xx.py", AbstractComponent.TYPE_PYTHON);
+        metaInfoBean.addComponentScript(componentName, "scripts/"+META_APP_OS_BOOT_PY, AbstractComponent.TYPE_PYTHON);
 
-        metaInfoBean.addOsSpecific("any","tarball", "files/tomcat-8.0.30.tar.gz");
+        metaInfoBean.addOsSpecific("any","tarball", "files/" + META_APP_TALLBALL_NAMW);
     }
 }

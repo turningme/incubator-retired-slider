@@ -16,6 +16,6 @@ public class PythonScriptGenHandler implements Handler<PythonScriptBean>{
 
     @Override
     public void handle(TemplateTopology templateTopology) {
-
+        pythonScriptBean = new PythonScriptBean();
     }
 }

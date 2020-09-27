@@ -2,6 +2,9 @@ package org.apache.slider.ext.persist;
 
 import org.apache.hadoop.fs.Path;
 
+import static org.apache.slider.ext.ExtConstants.META_APP_OS_BOOT_PY;
+import static org.apache.slider.ext.ExtConstants.META_APP_OS_PARAM_PY;
+import static org.apache.slider.ext.ExtConstants.META_APP_TALLBALL_NAMW;
 import static org.apache.slider.ext.ExtConstants.TEMPLATE_CLUSTER_LAYOUT_APPCONF;
 import static org.apache.slider.ext.ExtConstants.TEMPLATE_CLUSTER_LAYOUT_METAINFO;
 import static org.apache.slider.ext.ExtConstants.TEMPLATE_CLUSTER_LAYOUT_RESOURCE;
@@ -9,23 +12,19 @@ import static org.apache.slider.ext.ExtConstants.TEMPLATE_CLUSTER_LAYOUT_RESOURC
 /**
  * Created by jpliu on 2020/9/23.
  * Build extension resources . Look at example as follows :
- * root@bjo-ssp-sfx02[DEV:]:/home/jpliu/slider/app-tomcat/exploded$ tree
- * .
- * |-- appConfig-default.json
- * |-- LICENSE.txt
- * |-- metainfo.xml
- * |-- NOTICE.txt
- * |-- package
- * |   |-- files
- * |   |   `-- file.tar.gz
- * |   |-- scripts
- * |   |   |-- params.py
- * |   |   `-- xx.py
- * |   `-- templates
- * |       |-- xx.xml.j2
- * |       `-- yy.xml.j2
- * |-- README.md
- * `-- resources-default.json
+ /tmp/.template-cluster/template-app1/
+ |-- appConfig-default.json
+ |-- metainfo.json
+ |-- package
+ |   |-- files
+ |   |   `-- execute.tar.gz
+ |   |-- scripts
+ |   |   |-- boot.py
+ |   |   `-- params.py
+ |   `-- templates
+ `-- resources-default.json
+ *
+ *
  *
  */
 public class AppDefinitionPaths {
@@ -53,10 +52,10 @@ public class AppDefinitionPaths {
         scriptsPath= new Path(this.packagePath,"scripts");
         templatesPath= new Path(this.packagePath,"templates");
 
-        tarballPath = new Path(this.filesPath, "execute.tar.gz");
+        tarballPath = new Path(this.filesPath, META_APP_TALLBALL_NAMW);
 
-        paramsPyPath = new Path(this.scriptsPath, "params.py");
-        bootPyPath = new Path(this.scriptsPath, "boot.py");
+        paramsPyPath = new Path(this.scriptsPath, META_APP_OS_PARAM_PY);
+        bootPyPath = new Path(this.scriptsPath, META_APP_OS_BOOT_PY);
     }
 
     @Override
