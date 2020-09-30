@@ -17,6 +17,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 public class TemplateInstance  extends TemplateBase{
     int seq;
     List<Integer> partitions;
+    static final String SEPARATOR= "_";
 
 
     public TemplateInstance(List<Integer> partitions, int seq) {
@@ -35,7 +36,7 @@ public class TemplateInstance  extends TemplateBase{
 
     @Override
     public String getName() {
-        return name + "-" + seq;
+        return name + SEPARATOR + seq;
     }
 
     public void setPartitions(List<Integer> partitions) {

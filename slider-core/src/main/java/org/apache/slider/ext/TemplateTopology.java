@@ -1,21 +1,15 @@
 package org.apache.slider.ext;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.slider.ext.utils.ConvertUtil;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
-import static org.apache.slider.api.ResourceKeys.COMPONENT_INSTANCES;
-import static org.apache.slider.api.ResourceKeys.YARN_CORES;
-import static org.apache.slider.api.ResourceKeys.YARN_MEMORY;
 
 /**
  * Created by jpliu on 2020/9/23.
@@ -29,7 +23,7 @@ public class TemplateTopology {
     public Map<String, Template> templateMap;
     public Map<String, TemplateInstance> templateInstanceMap;
 
-    static final String PREFIX = "template-";
+    static final String PREFIX = "template_";
     private String name;
 
     public TemplateTopology(String appName) {

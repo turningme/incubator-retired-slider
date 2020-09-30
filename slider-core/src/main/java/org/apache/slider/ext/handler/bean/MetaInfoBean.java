@@ -139,6 +139,7 @@ public class MetaInfoBean {
         if (target == null) {
             target = new OSSpecific();
             target.setOsType(osType);
+            application.getOSSpecifics().add(target);
         }
 
         OSPackage osPackage = new OSPackage();
