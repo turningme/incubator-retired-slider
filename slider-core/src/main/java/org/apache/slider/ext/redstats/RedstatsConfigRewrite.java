@@ -25,6 +25,7 @@ public class RedstatsConfigRewrite {
 
     public void init(HierarchicalINIConfiguration  ini){
         conf = (HierarchicalINIConfiguration) ini.clone();
+        conf.setDelimiterParsingDisabled(true);
     }
 
 
