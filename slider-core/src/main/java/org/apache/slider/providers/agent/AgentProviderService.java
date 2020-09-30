@@ -543,6 +543,26 @@ public class AgentProviderService extends AbstractProviderService implements
       }
     }
 
+    //Additional files to localize for current role group, this method should be refactored later
+    String appResourcesStringByRole = appComponent.getOption(AgentKeys.APP_RESOURCES, null);
+    log.info("Configuration value for current role's ({}) resources to localize: {}",roleGroup, appResourcesStringByRole);
+    if (null != appResourcesStringByRole) {
+      try (Scanner scanner = new Scanner(appResourcesStringByRole).useDelimiter(",")) {
+        while (scanner.hasNext()) {
+          String resource = scanner.next();
+          Path resourcePath = new Path(resource);
+          LocalResource extraResource = fileSystem.createAmResource(
+                  fileSystem.getFileSystem().resolvePath(resourcePath),
+                  LocalResourceType.FILE);
+          String destination = AgentKeys.APP_RESOURCES_DIR + "/" + resourcePath.getName();
+          log.info("Localizing {} to {}", resourcePath, destination);
+          // TODO Can we try harder to avoid collisions?
+          launcher.addLocalResource(destination, extraResource);
+        }
+      }
+    }
+
+
     // initialize addon pkg states for all componentInstanceStatus
     Map<String, State> pkgStatuses = new TreeMap<>();
     for (Metainfo appPkg : packageMetainfo.values()) {
