@@ -3,6 +3,8 @@ package org.apache.slider.ext.utils;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.slider.ext.ExtConstants;
+
 /**
  * Created by jpliu on 2020/9/23.
  */
@@ -33,5 +35,33 @@ public class ConvertUtil {
             newMap.put(en.getKey(), newMapInner);
         }
         return newMap;
+    }
+
+    /**
+     *
+     * @param sourceKey
+     * @return
+     */
+    public static String getConfigurationPrefix(String sourceKey){
+        return ExtConstants.TEMPLATE_CONFIGURATION_KEY_PREFIX + sourceKey;
+    }
+
+    /**
+     * simply get path last fragment from the whole path
+     * @param path
+     * @return
+     */
+    public static String getShortNameFromPath(String path){
+        return path.substring(path.lastIndexOf("/")+1);
+    }
+
+    /**
+     *
+     * @param ammout
+     * @param unit
+     * @return
+     */
+    public static String getMemStringWithMeasure(int ammout, String unit){
+        return ammout+unit;
     }
 }

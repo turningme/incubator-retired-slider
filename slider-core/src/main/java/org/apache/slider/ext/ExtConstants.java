@@ -71,4 +71,13 @@ public class ExtConstants {
     public static final String TEMPLATE_CLUSTER_LAYOUT_APPCONF = "appConfig-default.json";
     public static final String TEMPLATE_CLUSTER_LAYOUT_METAINFO = "metainfo.json";
     public static final String TEMPLATE_CLUSTER_LAYOUT_RESOURCE = "resources-default.json";
+
+
+    /**
+     * configurations used in agent side
+     */
+
+    public static final String TEMPLATE_CONFIGURATION_KEY_PREFIX = "site.global.";
+    public static final String TEMPLATE_CONFIGURATION_MEMXMX_KEY = "jvm_heapsize";
+    public static final String TEMPLATE_CONFIGURATION_CONF_KEY = "redstats_conf";
 }
