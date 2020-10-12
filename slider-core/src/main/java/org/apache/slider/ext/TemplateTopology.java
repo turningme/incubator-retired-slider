@@ -116,8 +116,8 @@ public class TemplateTopology {
             int memXms = memEntry.getKey();
             int memXmx = memEntry.getValue();
 
-            templateMap.get(name).setMemXms(memXmx);
-            templateMap.get(name).setMemXmx(memXms);
+            templateMap.get(name).setMemXms(memXms);
+            templateMap.get(name).setMemXmx(memXmx);
         }
     }
 
