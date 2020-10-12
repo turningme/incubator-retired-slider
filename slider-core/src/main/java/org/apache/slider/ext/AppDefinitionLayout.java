@@ -22,6 +22,8 @@ import org.apache.slider.ext.handler.bean.ResourceBean;
 import org.apache.slider.ext.persist.AppDefinitionPaths;
 import org.apache.slider.ext.redstats.RedstatsConfigManager;
 import org.apache.slider.ext.utils.IOHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.slider.ext.ExtConstants.TEMPLATE_CLUSTER_LAYOUT_BASE_DIR;
 
@@ -29,6 +31,7 @@ import static org.apache.slider.ext.ExtConstants.TEMPLATE_CLUSTER_LAYOUT_BASE_DI
  * Created by jpliu on 2020/9/25.
  */
 public class AppDefinitionLayout {
+    static final Logger LOG  = LoggerFactory.getLogger(AppDefinitionLayout.class);
 
     private AppDefinitionPaths appDefinitionPaths;
     private MetaInfoBean metaInfoBean;
@@ -85,8 +88,11 @@ public class AppDefinitionLayout {
      */
     public void materialize() throws IOException, BadCommandArgumentsException {
         //detect if root folder exists , by now the root folder should be removed as soon as program exits .
+        //delete the base path if exists
         if (localFileSystem.exists(appDefinitionPaths.basePath)){
-            throw new BadCommandArgumentsException("Application local definition file exists . path = " + appDefinitionPaths.basePath);
+//            throw new BadCommandArgumentsException("Application local definition file exists . path = " + appDefinitionPaths.basePath);
+            LOG.warn("app definition path {} detected , should be removed right now !", appDefinitionPaths.basePath);
+            localFileSystem.delete(appDefinitionPaths.basePath,true);
         }
 
         //init root path
@@ -132,5 +138,7 @@ public class AppDefinitionLayout {
     }
 
 
-
+    public AppDefinitionPaths getAppDefinitionPaths() {
+        return appDefinitionPaths;
+    }
 }

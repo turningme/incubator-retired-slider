@@ -15,11 +15,14 @@ import org.apache.slider.core.exceptions.SliderException;
 import org.apache.slider.ext.args.ActionBuildArgs;
 import org.apache.slider.ext.args.ActionMetaConvertArgs;
 import org.apache.slider.ext.args.ActionStartArgs;
+import org.apache.slider.ext.args.ActionStopArgs;
 
 import static org.apache.slider.common.params.SliderActions.ACTION_HELP;
 import static org.apache.slider.ext.ExtConstants.ACTION_BUILD;
+import static org.apache.slider.ext.ExtConstants.ACTION_BUILD_START;
 import static org.apache.slider.ext.ExtConstants.ACTION_META_CONVERT;
 import static org.apache.slider.ext.ExtConstants.ACTION_START;
+import static org.apache.slider.ext.ExtConstants.ACTION_STOP;
 
 /**
  * Parse SE Cluster input arguments into StartupInformation representation .
@@ -43,6 +46,8 @@ public class CmdlineParser extends AbstractArgsDelegate {
     private final ActionBuildArgs actionBuild = new ActionBuildArgs();
     private final ActionMetaConvertArgs actionMetaConvert = new ActionMetaConvertArgs();
 
+    private final ActionStopArgs actionStop = new ActionStopArgs();
+
     /**
      *
      * @param args
@@ -59,6 +64,7 @@ public class CmdlineParser extends AbstractArgsDelegate {
         commander.addCommand(actionStart);
         commander.addCommand(actionBuild);
         commander.addCommand(actionMetaConvert);
+        commander.addCommand(actionStop);
     }
 
     /**
@@ -120,8 +126,14 @@ public class CmdlineParser extends AbstractArgsDelegate {
             case ACTION_BUILD:
                 bindCoreAction(actionBuild);
                 break;
+            case ACTION_BUILD_START:
+                bindCoreAction(actionBuild);
+                break;
             case ACTION_START:
                 bindCoreAction(actionStart);
+                break;
+            case ACTION_STOP:
+                bindCoreAction(actionStop);
                 break;
             case ACTION_META_CONVERT:
                 bindCoreAction(actionMetaConvert);
@@ -152,6 +164,10 @@ public class CmdlineParser extends AbstractArgsDelegate {
 
     public ActionStartArgs getActionStart() {
         return actionStart;
+    }
+
+    public ActionStopArgs getActionStop() {
+        return actionStop;
     }
 
     public ActionMetaConvertArgs getActionMetaConvert() {

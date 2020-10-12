@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.configuration.ConfigurationException;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -18,8 +18,10 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathNotFoundException;
 import org.apache.hadoop.registry.client.binding.RegistryUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.apache.slider.client.SliderClient;
 import org.apache.slider.client.SliderYarnClientImpl;
 import org.apache.slider.common.params.AbstractActionArgs;
+import org.apache.slider.common.params.ClientArgs;
 import org.apache.slider.common.tools.ConfigHelper;
 import org.apache.slider.common.tools.SliderFileSystem;
 import org.apache.slider.core.exceptions.BadCommandArgumentsException;
@@ -30,23 +32,21 @@ import org.apache.slider.core.main.ServiceLauncher;
 import org.apache.slider.core.registry.YarnAppListClient;
 import org.apache.slider.ext.args.ActionBuildArgs;
 import org.apache.slider.ext.args.ActionMetaConvertArgs;
+import org.apache.slider.ext.args.ActionStartArgs;
+import org.apache.slider.ext.args.ActionStopArgs;
 import org.apache.slider.ext.persist.TemplateTopologySerDeser;
 import org.apache.slider.ext.utils.ConvertUtil;
-import org.apache.slider.server.services.utility.AbstractSliderLaunchedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.slider.common.SliderKeys.SLIDER_CLIENT_XML;
 import static org.apache.slider.common.tools.SliderUtils.forceLogin;
 import static org.apache.slider.common.tools.SliderUtils.initProcessSecurity;
 import static org.apache.slider.common.tools.SliderUtils.isHadoopClusterSecure;
 import static org.apache.slider.common.tools.SliderUtils.loadSliderClientXML;
 import static org.apache.slider.common.tools.SliderUtils.patchConfiguration;
 import static org.apache.slider.common.tools.SliderUtils.validateSliderClientEnvironment;
-import static org.apache.slider.core.main.LauncherExitCodes.EXIT_SUCCESS;
-import static org.apache.slider.core.main.LauncherExitCodes.EXIT_UNIMPLEMENTED;
-import static org.apache.slider.core.main.LauncherExitCodes.EXIT_USAGE;
 import static org.apache.slider.ext.ExtConstants.ACTION_BUILD;
+import static org.apache.slider.ext.ExtConstants.ACTION_BUILD_START;
 import static org.apache.slider.ext.ExtConstants.ACTION_META_CONVERT;
 import static org.apache.slider.ext.ExtConstants.ACTION_START;
 import static org.apache.slider.ext.ExtConstants.ACTION_STOP;
@@ -54,7 +54,7 @@ import static org.apache.slider.ext.ExtConstants.ACTION_STOP;
 /**
  * Created by jpliu on 2020/9/22.
  */
-public class ExtensionMain extends AbstractSliderLaunchedService implements RunService {
+public class ExtensionMain extends SliderClient implements RunService {
     static final Logger LOG = LoggerFactory.getLogger(ExtensionMain.class);
 
     /**
@@ -71,11 +71,11 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
 
 
     public ExtensionMain() {
-        super("Template-Cluster");
+        super();
     }
 
     public ExtensionMain(String name) {
-        super(name);
+        super();
     }
 
 
@@ -86,12 +86,40 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
         return localFileSystem;
     }
 
+
+    private int actionBuildStart(ActionBuildArgs args) throws Throwable {
+        actionBuild(args);
+
+        String appName = args.getApplicationName();
+        startHelper(appName);
+        LOG.info("started application {} ", appName);
+
+        return EXIT_SUCCESS;
+    }
+
+
+    private int actionStart(ActionStartArgs args) throws Throwable {
+        String appName = args.getApplicationName();
+        startHelper(appName);
+        LOG.info("started application {} ", appName);
+
+        return EXIT_SUCCESS;
+    }
+
+
+
+    private int actionStop(ActionStopArgs args) throws Throwable {
+        String appName = args.getApplicationName();
+        stopHelper(appName);
+        LOG.info("stopped application {} ", appName);
+        return EXIT_SUCCESS;
+    }
     /**
      *
      * @param args
      * @return
      */
-    private int actionBuild(ActionBuildArgs args) throws BadCommandArgumentsException, IOException, ConfigurationException {
+    private int actionBuild(ActionBuildArgs args) throws Throwable {
         String name = args.getApplicationName();
 
         TemplateTopology templateTopology = new TemplateTopology(name);
@@ -115,7 +143,6 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
         LOG.info(TemplateTopologySerDeser.toString(templateTopology));
         //persist it on hdfs
 
-
         appDefinitionLayout.resolveFromTemplateTopology(templateTopology);
 
 
@@ -123,6 +150,16 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
         appDefinitionLayout.materialize();
 
         //call build , and start from slider client
+        String appName = name;
+
+        String appResourcesPathLocal = appDefinitionLayout.getAppDefinitionPaths().resourcesPath.toUri().getPath();
+        String appTemplatePathLocal = appDefinitionLayout.getAppDefinitionPaths().appConfPath.toUri().getPath();
+        String appDefPathLocal = appDefinitionLayout.getAppDefinitionPaths().basePath.toUri().getPath();
+
+        destroyHelper(appName);
+        LOG.info("destroyed application {} ", appName);
+        buildHelper(appName, appDefPathLocal, appResourcesPathLocal , appTemplatePathLocal);
+        LOG.info("build application {} , def ={} , resource = {} , template = {} ", appName, appDefPathLocal, appResourcesPathLocal, appTemplatePathLocal);
 
 
         return EXIT_SUCCESS;
@@ -169,11 +206,12 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
             case ACTION_BUILD:
                 actionBuild(parser.getActionBuild());
                 break;
-
             case ACTION_START:
+                parser.getActionStart();
                 break;
 
             case ACTION_STOP:
+                parser.getActionStop();
                 break;
 
             default:
@@ -205,6 +243,7 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
      * @return an exit code
      * @throws Throwable on a failure
      */
+    @Override
     public int exec() throws Throwable {
 
         int exitCode = EXIT_SUCCESS;
@@ -218,10 +257,16 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
                 exitCode = actionBuild(parser.getActionBuild());
                 break;
 
+            case ACTION_BUILD_START:
+                exitCode = actionBuildStart(parser.getActionBuild());
+                break;
+
             case ACTION_START:
+                actionStart(parser.getActionStart());
                 break;
 
             case ACTION_STOP:
+                actionStop(parser.getActionStop());
                 break;
 
             case ACTION_META_CONVERT:
@@ -237,7 +282,7 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
 
     @Override
     public Configuration bindArgs(Configuration config, String... args) throws Exception {
-        config = super.bindArgs(config, args);
+//        config = super.bindArgs(config, args);
         parser = new CmdlineParser(args);
         parser.parse();
         // add the slider XML config
@@ -263,10 +308,11 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
         if (coreAction.getHadoopServicesRequired()) {
             initHadoopBinding();
         }
-        super.serviceInit(conf);
+//        super.serviceInit(conf);
     }
 
 
+    @Override
     protected void initHadoopBinding() throws IOException, SliderException {
         // validate the client
         validateSliderClientEnvironment(null);
@@ -281,11 +327,66 @@ public class ExtensionMain extends AbstractSliderLaunchedService implements RunS
                 new YarnAppListClient(yarnClient, getUsername(), getConfig());
         // create the filesystem
         sliderFileSystem = new SliderFileSystem(getConfig());
+
+        super.initHadoopBinding();
     }
 
+    @Override
     public String getUsername() throws IOException {
         return RegistryUtils.currentUser();
     }
+
+
+
+    ////////////////////////////////// Helpers from the API of SliderClients.
+    /**
+     *
+     * @param args
+     * @throws SliderException
+     */
+    protected void reSetClientArgs(String[] args) throws SliderException {
+        serviceArgs = new ClientArgs(args);
+        serviceArgs.parse();
+    }
+
+
+    protected void executeSliderClient() throws Throwable {
+        super.exec();
+    }
+
+
+    /**
+     *
+     * @param appName
+     * @throws Throwable
+     */
+    protected void stopHelper(String appName) throws Throwable {
+        reSetClientArgs(("stop " + appName).split(" "));
+        executeSliderClient();
+    }
+
+    protected void startHelper(String appName) throws Throwable {
+        reSetClientArgs(("start " + appName).split(" "));
+        executeSliderClient();
+    }
+
+    /**
+     *
+     * @param appName
+     * @throws Throwable
+     */
+    protected void destroyHelper(String appName) throws Throwable {
+        reSetClientArgs(("destroy --force " + appName).split(" "));
+        executeSliderClient();
+    }
+
+
+    protected void buildHelper(String appName,String appdef, String resources , String template ) throws Throwable {
+        reSetClientArgs(String.format("build %s --appdef %s --resources %s --template %s", appName , appdef , resources, template ).split(" "));
+        executeSliderClient();
+    }
+
+
 
     public static final String SERVICE_CLASSNAME = "org.apache.slider.ext.ExtensionMain";
 

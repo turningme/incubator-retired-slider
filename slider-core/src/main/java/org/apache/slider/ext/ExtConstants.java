@@ -15,6 +15,7 @@ public class ExtConstants {
 
     public static final String ACTION_START = "start";
     public static final String ACTION_BUILD = "build";
+    public static final String ACTION_BUILD_START = "buildstart";
     public static final String ACTION_STOP = "stop";
     public static final String ACTION_META_CONVERT = "metaconvert";
 

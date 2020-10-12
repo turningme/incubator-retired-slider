@@ -246,7 +246,7 @@ public class SliderClient extends AbstractSliderLaunchedService implements RunSe
   // value should not be changed without updating string find in slider.py
   private static final String PASSWORD_PROMPT = "Enter password for";
 
-  private ClientArgs serviceArgs;
+  protected ClientArgs serviceArgs;
   public ApplicationId applicationId;
   
   private String deployedClusterName;
