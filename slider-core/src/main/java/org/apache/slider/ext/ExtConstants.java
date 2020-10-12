@@ -8,6 +8,7 @@ import static org.apache.slider.common.SliderKeys.COMPONENT_AM;
  */
 public class ExtConstants {
 
+    public static final String  FS_CLUSTER_BASE = "/user/root/.template-cluster";
 
     /**
      * Action key

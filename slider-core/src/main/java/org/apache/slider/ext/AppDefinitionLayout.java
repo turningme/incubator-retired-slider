@@ -25,6 +25,7 @@ import org.apache.slider.ext.utils.IOHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.slider.ext.ExtConstants.FS_CLUSTER_BASE;
 import static org.apache.slider.ext.ExtConstants.TEMPLATE_CLUSTER_LAYOUT_BASE_DIR;
 
 /**
@@ -128,7 +129,7 @@ public class AppDefinitionLayout {
      * @param sliderFileSystem
      */
     public void generateConfiguration(TemplateTopology templateTopology, SliderFileSystem sliderFileSystem) throws IOException, ConfigurationException {
-        String  confBasePath = "/user/root/.template-cluster";
+        String  confBasePath = FS_CLUSTER_BASE;
         sliderFileSystem.getFileSystem().mkdirs(new Path(confBasePath));
         templateTopology.updateTemplateConfigPath(confBasePath);
 

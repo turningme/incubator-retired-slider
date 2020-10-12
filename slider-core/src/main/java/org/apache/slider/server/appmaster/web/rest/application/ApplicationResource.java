@@ -19,6 +19,8 @@
 package org.apache.slider.server.appmaster.web.rest.application;
 
 import com.google.common.collect.Lists;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.exceptions.YarnRuntimeException;
 import org.apache.hadoop.yarn.webapp.BadRequestException;
 import org.apache.hadoop.yarn.webapp.NotFoundException;
@@ -27,6 +29,7 @@ import org.apache.slider.api.types.ComponentInformation;
 import org.apache.slider.api.types.ContainerInformation;
 import org.apache.slider.api.types.NodeInformation;
 import org.apache.slider.api.types.NodeInformationList;
+import org.apache.slider.common.tools.SliderFSUtils;
 import org.apache.slider.core.conf.AggregateConf;
 import org.apache.slider.core.conf.ConfTree;
 import org.apache.slider.core.exceptions.NoSuchNodeException;
@@ -64,9 +67,9 @@ import javax.ws.rs.core.Context;
 
 import static javax.ws.rs.core.MediaType.*;
 
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -263,6 +266,39 @@ public class ApplicationResource extends AbstractSliderResource {
     } catch (Exception e) {
       throw buildException(LIVE_CONTAINERS, e);
     }
+  }
+
+  @GET
+  @Path(LIVE_CUSTOM_CONFIGS)
+  @Produces({APPLICATION_JSON})
+  public Map<String,Map<String,String>> getLiveCustomConfigs(){
+    Map<String,Map<String,String>> result = new HashMap<>();
+
+
+    ConfTree confTree = getModelDesiredAppconf();
+    Iterator<Map.Entry<String,Map<String,String>>> iterator = confTree.components.entrySet().iterator();
+    try {
+      while (iterator.hasNext()){
+        Map.Entry<String,Map<String,String>> enry = iterator.next();
+        String component = enry.getKey();
+        if (!"slider-appmaster".equals(component)){
+          Map<String,String> val = enry.getValue();
+          String resourcePath = val.get("application.resources");
+          if (StringUtils.isNotBlank(resourcePath)){
+            Map<String,String> cmap = new HashMap<>();
+            cmap.put("Path", resourcePath);
+            SliderFSUtils.retriveConfigContentAsString(resourcePath, cmap);
+
+            result.put(component, cmap);
+          }
+        }
+      }
+    }catch (Exception e) {
+      throw buildException(LIVE_CUSTOM_CONFIGS, e);
+    }
+
+
+    return result;
   }
 
   @GET

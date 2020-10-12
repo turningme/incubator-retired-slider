@@ -159,6 +159,7 @@ public class RestPaths {
   public static final String ACTION_PING = ACTION + "/ping";
   public static final String ACTION_STOP = ACTION + "/stop";
 
+  public static final String LIVE_CUSTOM_CONFIGS = "/live/customconfigs";
   /**
    * Path to a role
    * @param name role name
