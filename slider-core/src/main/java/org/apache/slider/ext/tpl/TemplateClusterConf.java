@@ -70,27 +70,27 @@ public class TemplateClusterConf {
         return result;
     }
 
-    public Map<String, Integer> getTemplateByParallelism(){
-        Map<String, Integer> result = new HashMap<>();
+    public Map<String, String> getTemplateByParallelism(){
+        Map<String, String> result = new HashMap<>();
         Iterator<Map.Entry<String, TemplateConf>> iter = templates.entrySet().iterator();
         while (iter.hasNext()){
             Map.Entry<String, TemplateConf> en = iter.next();
             String tplName = en.getKey();
             TemplateConf templateConf = en.getValue();
-            result.put(tplName,templateConf.getParallel());
+            result.put(tplName,templateConf.getParallel() + "");
         }
 
         return result;
     }
 
-    public Map<String, Integer> getTemplatePartitionNum(){
-        Map<String, Integer> result = new HashMap<>();
+    public Map<String, String> getTemplatePartitionNum(){
+        Map<String, String> result = new HashMap<>();
         Iterator<Map.Entry<String, TemplateConf>> iter = templates.entrySet().iterator();
         while (iter.hasNext()){
             Map.Entry<String, TemplateConf> en = iter.next();
             String tplName = en.getKey();
             TemplateConf templateConf = en.getValue();
-            result.put(tplName,templateConf.getPartitions());
+            result.put(tplName,templateConf.getPartitions() + "");
         }
 
         return result;

@@ -39,6 +39,14 @@ public class TemplateClusterConfParser {
     }
 
 
+    public static TemplateClusterConf parseFromFile(String path) throws IOException {
+        FileInputStream fileInputStream =  new FileInputStream(path);
+
+        TemplateClusterConfParser parser = new TemplateClusterConfParser();
+        TemplateClusterConf templateClusterConf = parser.fromJsonStream(fileInputStream);
+        return templateClusterConf;
+    }
+
     public static void main(String[] args) throws IOException {
         String path = "/Users/jpliu/github/incubator-retired-slider/app-packages/app-statsengine/t1.json";
         FileInputStream fileInputStream =  new FileInputStream(path);

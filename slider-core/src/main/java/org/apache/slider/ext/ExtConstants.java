@@ -30,6 +30,7 @@ public class ExtConstants {
     public static final String ARG_TEMPLATE_MEMORY_NAME = "--template.mem";
     public static final String ARG_TEMPLATE_INSTANCE_MEMORY_NAME = "--template.instance.mem";
     public static final String ARG_APPLICATION_TARBALL_PATH = "--tarball";
+    public static final String ARG_APPLICATION_CONFIG_FILE = "--config.file";
 
     /**
      * meta convert

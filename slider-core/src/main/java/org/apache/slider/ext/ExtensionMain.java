@@ -8,6 +8,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 
 import org.apache.commons.lang.StringUtils;
@@ -35,6 +36,8 @@ import org.apache.slider.ext.args.ActionMetaConvertArgs;
 import org.apache.slider.ext.args.ActionStartArgs;
 import org.apache.slider.ext.args.ActionStopArgs;
 import org.apache.slider.ext.persist.TemplateTopologySerDeser;
+import org.apache.slider.ext.tpl.TemplateClusterConf;
+import org.apache.slider.ext.tpl.TemplateClusterConfParser;
 import org.apache.slider.ext.utils.ConvertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,12 +117,9 @@ public class ExtensionMain extends SliderClient implements RunService {
         LOG.info("stopped application {} ", appName);
         return EXIT_SUCCESS;
     }
-    /**
-     *
-     * @param args
-     * @return
-     */
-    private int actionBuild(ActionBuildArgs args) throws Throwable {
+
+
+    private TemplateTopology parseTemplateTopology(ActionBuildArgs args) throws BadCommandArgumentsException {
         String name = args.getApplicationName();
 
         TemplateTopology templateTopology = new TemplateTopology(name);
@@ -133,6 +133,42 @@ public class ExtensionMain extends SliderClient implements RunService {
         templateTopology.resolveTemplateInstances();
 
         templateTopology.addTemplateInstanceMemInfo(args.getTemplateInstanceMemMap());
+        return templateTopology;
+    }
+
+    private TemplateTopology parseTemplateTopology(String configFile) throws BadCommandArgumentsException, IOException {
+        TemplateClusterConf templateClusterConf = TemplateClusterConfParser.parseFromFile(configFile);
+        TemplateTopology templateTopology = new TemplateTopology(templateClusterConf.getAppName());
+        templateTopology.setTarballPath(templateClusterConf.getTarball());
+
+
+        templateTopology.addTemplate(templateClusterConf.getTemplateInfo());
+        templateTopology.addTemplateByParallelism(ConvertUtil.convert(templateClusterConf.getTemplateByParallelism()));
+        templateTopology.addTemplateByPartitionNum(ConvertUtil.convert(templateClusterConf.getTemplatePartitionNum()));
+        templateTopology.addTemplateMemInfo(templateClusterConf.getTemplateMemInfo());
+
+        templateTopology.resolveTemplateInstances();
+
+        templateTopology.addTemplateInstanceMemInfo(templateClusterConf.getTemplateInstanceMemInfo());
+
+        return templateTopology;
+    }
+
+
+    /**
+     *
+     * @param args
+     * @return
+     */
+    private int actionBuild(ActionBuildArgs args) throws Throwable {
+        TemplateTopology templateTopology ;
+
+        if (args.getConfigFile() != null ){
+            templateTopology = parseTemplateTopology(args.getConfigFile());
+        }else {
+            templateTopology =  parseTemplateTopology(args);
+        }
+
 
         //file directory structure planing
         AppDefinitionLayout appDefinitionLayout = new AppDefinitionLayout(getLocalFileSystem());
@@ -150,7 +186,7 @@ public class ExtensionMain extends SliderClient implements RunService {
         appDefinitionLayout.materialize();
 
         //call build , and start from slider client
-        String appName = name;
+        String appName = args.getActionName();
 
         String appResourcesPathLocal = appDefinitionLayout.getAppDefinitionPaths().resourcesPath.toUri().getPath();
         String appTemplatePathLocal = appDefinitionLayout.getAppDefinitionPaths().appConfPath.toUri().getPath();
